@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnowWorld - Narrowcasting Display</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Main Display Container -->
+    <div id="displayContainer" class="display-container">
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading-screen active">
+            <div class="loading-content">
+                <div class="snowflake-loader">
+                    <i class="fas fa-snowflake"></i>
+                </div>
+                <h2>SnowWorld</h2>
+                <p>Narrowcasting Systeem</p>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Display Area -->
+        <div id="contentDisplay" class="content-display">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+
+        <!-- Weather Widget -->
+        <div id="weatherWidget" class="weather-widget">
+            <div class="weather-content">
+                <div class="weather-temp">
+                    <span id="temperature">-5</span>°C
+                </div>
+                <div class="weather-info">
+                    <div class="weather-condition">
+                        <i class="fas fa-snowflake"></i>
+                        <span id="snowCondition">Frisse sneeuw</span>
+                    </div>
+                    <div class="weather-details">
+                        <span id="humidity">65%</span> | 
+                        <span id="windSpeed">8</span> km/u
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone Indicator -->
+        <div id="zoneIndicator" class="zone-indicator">
+            <div class="zone-info">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="currentZone">Receptie</span>
+            </div>
+        </div>
+
+        <!-- Time Display -->
+        <div id="timeDisplay" class="time-display">
+            <div class="time-content">
+                <div id="currentTime" class="current-time">12:00</div>
+                <div id="currentDate" class="current-date">1 januari 2026</div>
+            </div>
+        </div>
+
+        <!-- Snow Animation Background -->
+        <div class="snow-animation">
+            <div class="snowflake">❄</div>
+            <div class="snowflake">❅</div>
+            <div class="snowflake">❄</div>
+            <div class="snowflake">❅</div>
+            <div class="snowflake">❄</div>
+            <div class="snowflake">❅</div>
+            <div class="snowflake">❄</div>
+            <div class="snowflake">❅</div>
+        </div>
+
+        <!-- Connection Status -->
+        <div id="connectionStatus" class="connection-status">
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Verbinden...</span>
+            </div>
+        </div>
+
+        <!-- Error Overlay -->
+        <div id="errorOverlay" class="error-overlay">
+            <div class="error-content">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>Verbindingsfout</h3>
+                <p id="errorMessage">Kan geen verbinding maken met de server</p>
+                <button id="retryButton" class="retry-button">
+                    <i class="fas fa-redo"></i> Opnieuw proberen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone Selection Modal (for initial setup) -->
+    <div id="zoneModal" class="zone-modal">
+        <div class="zone-modal-content">
+            <h2>Kies Zone</h2>
+            <p>Selecteer de zone voor dit display:</p>
+            <div id="zoneOptions" class="zone-options">
+                <!-- Zone options will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="js/display.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/connection.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

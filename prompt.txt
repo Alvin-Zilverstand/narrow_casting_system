@@ -1,0 +1,39 @@
+Onderwerp: Ontwikkeling Narrow Casting Systeem SnowWorld (Challenge 18)
+
+Context: Ik werk aan een project voor SnowWorld waarbij ik een narrowcasting platform moet bouwen. Gebruik het bijgevoegde Markdown-bestand als de leidraad voor de functionele eisen, deliverables en technische randvoorwaarden. We gaan dit systeem bouwen met Node.js als backend server.
+
+Opdracht voor Kiki: Fungeer als een Senior Full-stack Developer. Ontwerp en schrijf de basiscode voor een schaalbaar narrowcasting systeem dat bestaat uit de volgende onderdelen:
+
+1. Systeem Architectuur:
+
+    Backend: Een Node.js server (met Express) die fungeert als centrale hub.
+
+    Database: Stel een structuur voor (bijv. MongoDB of PostgreSQL) voor het opslaan van content-metadata en planningen.
+
+    Frontend (Admin Dashboard): Een interface voor beheerders om content (afbeeldingen, video's, livestreams, social media feeds) te uploaden en in te plannen.
+
+    Client (Display App): Een web-based player die de content ophaalt van de server en schermvullend weergeeft op de schermen in SnowWorld.
+
+2. Specifieke Functionaliteiten (gebaseerd op Challenge 18):
+
+    Content Planning: Mogelijkheid om per zone in SnowWorld (bijv. de skibaan, het restaurant, de receptie) verschillende playlists te tonen.
+
+    Real-time Updates: Gebruik WebSockets (Socket.io) zodat content direct ververst wanneer de beheerder een aankondiging of skipisteschema aanpast.
+
+    Content Types: Ondersteuning voor afbeeldingen, video, en een widget voor actuele sneeuwinformatie.
+
+3. Technische Output:
+
+    Genereer een mappenstructuur voor het project.
+
+    Schrijf de server.js (Node.js/Express) met API endpoints voor content management.
+
+    Geef een voorbeeld van het technisch ontwerp (K1-W2) in de vorm van een database schema of een flowchart van de dataflow.
+
+    Zorg dat de code voldoet aan de eisen voor documentatie en onderhoudbaarheid.
+
+4. Instructies:
+
+    Houd de UI modern en passend bij de winterse uitstraling van SnowWorld.
+
+    Geef uitleg bij de gemaakte ontwerpbeslissingen zodat ik deze kan gebruiken voor mijn documentatie (Deliverable K1-W2).

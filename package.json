@@ -1,0 +1,36 @@
+{
+  "name": "snowworld-narrowcasting-system",
+  "version": "1.0.0",
+  "description": "Narrowcasting systeem voor SnowWorld - MBO Challenge 18",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "admin": "cd admin && npm start",
+    "setup": "npm run setup:backend && npm run setup:admin",
+    "setup:backend": "cd backend && npm install",
+    "setup:admin": "cd admin && npm install",
+    "test": "echo 'Tests not implemented yet'",
+    "build": "echo 'Build complete - ready for deployment'",
+    "docs": "echo 'See docs/TECHNICAL_DOCUMENTATION.md for full documentation'"
+  },
+  "keywords": [
+    "narrowcasting",
+    "digital-signage",
+    "snowworld",
+    "mbo-challenge",
+    "nodejs",
+    "websocket",
+    "real-time"
+  ],
+  "author": "SnowWorld Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/snowworld/narrowcasting-system"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

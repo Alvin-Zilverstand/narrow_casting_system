@@ -1,0 +1,44 @@
+# SnowWorld Narrowcasting System - Docker Compose Configuration
+
+version: '3.8'
+
+services:
+  snowworld-narrowcasting:
+    build: .
+    container_name: snowworld-narrowcasting
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./database:/app/database
+      - ./logs:/app/logs
+      - ./public/uploads:/app/public/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    networks:
+      - snowworld-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: snowworld-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - snowworld-narrowcasting
+    restart: unless-stopped
+    networks:
+      - snowworld-network
+
+networks:
+  snowworld-network:
+    driver: bridge
+
+volumes:
+  database-data:
+  uploads-data:
+  logs-data:
