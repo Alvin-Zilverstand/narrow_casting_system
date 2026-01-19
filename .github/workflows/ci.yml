@@ -132,18 +132,17 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Create lowercase repository name
-      id: repo_name
+    - name: Set lowercase repository name
       run: |
-        REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-        echo "repository_name=$REPO_NAME" >> $GITHUB_OUTPUT
-        echo "Using repository name: $REPO_NAME"
+        # Convert repository name to lowercase for Docker compatibility
+        echo "DOCKER_REPO=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "Using Docker repository: $(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
     
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ steps.repo_name.outputs.repository_name }}
+        images: ghcr.io/${{ env.DOCKER_REPO }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
