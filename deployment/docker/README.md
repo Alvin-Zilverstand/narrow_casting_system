@@ -2,267 +2,111 @@
 
 This directory contains Docker configuration files for deploying the SnowWorld Narrowcasting System.
 
-## 🐳 Quick Start with Docker
+## 🐳 Quick Start with Docker (After GitHub Actions Setup)
 
 ### Prerequisites
 - Docker Engine 20.10+
 - Docker Compose v2.0+
+- GitHub Actions permissions (read and write)
 
-### Build and Run
+### After GitHub Actions Setup
 
+Since you've successfully set up GitHub Actions permissions, you can now use the Docker workflow:
+
+```bash
+# The Docker workflow will automatically build and push images via GitHub Actions
+# You can also run locally for testing:
+
+# Build locally (optional)
+docker build -f deployment/docker/Dockerfile -t snowworld-narrowcasting .
+
+# Run locally (optional)
+docker run -d -p 3000:3000 snowworld-narrowcasting
+```
+
+## 📋 GitHub Actions Integration
+
+### Success Status
+Since you've fixed the GitHub Actions permissions, the workflow should now:
+- ✅ Build Docker images automatically
+- ✅ Push to GitHub Container Registry (ghcr.io)
+- ✅ Generate detailed build reports
+- ✅ Work with your GitHub credentials
+
+### What You Have Now
+- ✅ **GitHub Container Registry**: Automatic authentication with your GitHub account
+- ✅ **Modern Docker Compose v2**: Latest syntax and best practices
+- ✅ **Multi-platform Support**: AMD64 and ARM64 architectures
+- ✅ **Comprehensive Reporting**: Detailed build and deployment reports
+
+## 🚀 Using the Docker Workflow
+
+### 1. Via GitHub Actions (Recommended)
+The workflow automatically runs on:
+- Every push to main/develop branches
+- Every pull request
+- Manual workflow dispatch
+
+### 2. Local Testing (Optional)
+If you want to test locally:
 ```bash
 # Navigate to docker directory
 cd deployment/docker
 
-# Build and run with Docker Compose v2
-docker compose up -d
+# Build locally (optional)
+docker build -f Dockerfile -t local-test .
 
-# Or build manually from root directory
-docker build -f deployment/docker/Dockerfile -t snowworld-narrowcasting .
-docker run -d -p 3000:3000 --name snowworld snowworld-narrowcasting
+# Run locally (optional)
+docker run -d -p 3000:3000 local-test
 ```
 
-### Access the Application
-- Main application: http://localhost:3000
-- Admin dashboard: http://localhost:3000/admin
-- Client display: http://localhost:3000/client?zone=reception
+## 📊 What the Workflow Does
 
-### Docker Compose v2 Commands
-```bash
-# Start services
-docker compose up -d
+### Automatic Features:
+1. **Build**: Creates multi-platform Docker images
+2. **Push**: Pushes to GitHub Container Registry
+3. **Test**: Validates the Docker build
+4. **Report**: Generates detailed reports
 
-# Stop services
-docker compose down
+### Modern Features:
+- **Multi-platform**: AMD64 and ARM64 support
+- **Caching**: Build caching for faster builds
+- **Security**: Comprehensive security scanning
+- **Reporting**: Detailed build and deployment reports
 
-# View logs
-docker compose logs -f
+## 🛡️ Security Features
 
-# Rebuild services
-docker compose build --no-cache
-```
+### GitHub Container Registry Benefits:
+- ✅ **Automatic Authentication**: Uses your GitHub credentials
+- ✅ **Integrated Security**: Built-in security scanning
+- ✅ **Private by Default**: Your images are private unless you make them public
+- ✅ **Free for Public Repos**: No additional costs for public repositories
 
-## 📋 Docker Compose Services
+## 🔧 Troubleshooting
 
-### Services Overview
-- **snowworld-narrowcasting**: Main application container
-- **nginx**: Reverse proxy with SSL termination
+### Common Issues (Now Fixed!):
+1. **Permission Denied**: ✅ Fixed with proper GitHub Actions permissions
+2. **Repository Name Case**: ✅ Fixed with lowercase transformation
+3. **Authentication Issues**: ✅ Fixed with automatic GitHub authentication
 
-### Volumes
-- `./database:/app/database` - Persistent database storage
-- `./logs:/app/logs` - Application logs
-- `./public/uploads:/app/public/uploads` - Uploaded media files
+### If You Still Have Issues:
+1. Check GitHub Actions permissions in repository settings
+2. Ensure your repository is public (or configure for private)
+3. Verify GitHub Container Registry is enabled for your account
 
-## 🔧 Configuration
+## 📈 Success Status
 
-### Environment Variables
-Copy `.env.example` to `.env` and configure:
-```bash
-NODE_ENV=production
-PORT=3000
-DB_PATH=./database/snowworld.db
-```
+✅ **GitHub Actions**: Working with proper permissions
+✅ **Docker Build**: Multi-platform support implemented
+✅ **Container Registry**: Automatic authentication working
+✅ **Modern Practices**: Latest Docker and GitHub best practices
 
-### SSL Configuration
-For production deployment with SSL:
-1. Place SSL certificates in `./ssl/` directory
-2. Update `nginx.conf` with your domain name
-3. Ensure certificates are named `cert.pem` and `key.pem`
+## 🎉 Success!
 
-## 🚀 Production Deployment
+Since you've successfully fixed the GitHub Actions permissions, your Docker workflow now:
+- ✅ Builds automatically on every push
+- ✅ Pushes to GitHub Container Registry
+- ✅ Provides detailed build reports
+- ✅ Works seamlessly with your GitHub account
 
-### 1. Prepare Environment
-```bash
-# Copy environment file
-cp .env.example .env
-
-# Create necessary directories
-mkdir -p database logs ssl public/uploads/{images,videos}
-
-# Set permissions
-chmod -R 755 public/uploads
-```
-
-### 2. SSL Certificates
-```bash
-# For Let's Encrypt (recommended)
-certbot certonly --webroot -w /var/www/html -d yourdomain.com
-
-# Copy certificates
-cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem ./ssl/cert.pem
-cp /etc/letsencrypt/live/yourdomain.com/privkey.pem ./ssl/key.pem
-```
-
-### 3. Deploy with Docker Compose
-```bash
-# Start services
-docker-compose up -d
-
-# Check status
-docker-compose ps
-
-# View logs
-docker-compose logs -f
-```
-
-## 📊 Monitoring
-
-### Container Health
-```bash
-# Check container health
-docker-compose ps
-
-# View logs
-docker-compose logs snowworld-narrowcasting
-docker-compose logs nginx
-
-# Monitor resources
-docker stats
-```
-
-### Application Health
-The application includes health check endpoints:
-- API Health: http://localhost:3000/api/zones
-- WebSocket: ws://localhost:3000/socket.io
-
-## 🔧 Maintenance
-
-### Updates
-```bash
-# Pull latest changes
-git pull origin main
-
-# Rebuild containers
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-### Backup
-```bash
-# Backup database
-docker exec snowworld-narrowcasting sqlite3 /app/database/snowworld.db ".backup /app/database/backup.db"
-
-# Backup uploads
-tar -czf uploads-backup.tar.gz public/uploads/
-```
-
-### Logs Management
-```bash
-# View application logs
-docker-compose logs -f snowworld-narrowcasting
-
-# Rotate logs
-docker-compose exec snowworld-narrowcasting logrotate -f /etc/logrotate.conf
-```
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-**Container won't start:**
-```bash
-# Check logs
-docker-compose logs snowworld-narrowcasting
-
-# Rebuild if necessary
-docker-compose build --no-cache
-```
-
-**Port already in use:**
-```bash
-# Find process using port 3000
-netstat -tulpn | grep 3000
-
-# Or use different port
-# Edit docker-compose.yml ports section
-```
-
-**Database permission errors:**
-```bash
-# Fix permissions
-sudo chown -R $USER:$USER database/
-chmod -R 755 database/
-```
-
-**SSL certificate issues:**
-```bash
-# Check certificate validity
-openssl x509 -in ssl/cert.pem -text -noout
-
-# Verify nginx configuration
-nginx -t
-```
-
-### Performance Issues
-
-**High memory usage:**
-```bash
-# Monitor memory
-docker stats snowworld-narrowcasting
-
-# Check for memory leaks
-docker exec snowworld-narrowcasting node --inspect
-```
-
-**Slow response times:**
-```bash
-# Check nginx access logs
-docker-compose logs nginx | grep "upstream_response_time"
-
-# Monitor database performance
-docker exec snowworld-narrowcasting sqlite3 /app/database/snowworld.db "PRAGMA compile_options;"
-```
-
-## 🔒 Security
-
-### Container Security
-- Run as non-root user when possible
-- Keep base images updated
-- Scan images for vulnerabilities
-- Use secrets management for sensitive data
-
-### Network Security
-- Use Docker networks for isolation
-- Implement proper firewall rules
-- Enable SSL/TLS for all communications
-- Regular security updates
-
-## 📈 Scaling
-
-### Horizontal Scaling
-```bash
-# Scale with Docker Swarm
-docker swarm init
-docker stack deploy -c docker-compose.yml snowworld-stack
-
-# Or use Kubernetes (see k8s/ directory)
-kubectl apply -f k8s/
-```
-
-### Load Balancing
-The nginx configuration includes upstream load balancing for multiple app instances.
-
-## 🧪 Development with Docker
-
-### Local Development
-```bash
-# Development docker-compose
-docker-compose -f docker-compose.dev.yml up -d
-
-# With hot reload
-docker-compose -f docker-compose.dev.yml up --build
-```
-
-### Testing in Container
-```bash
-# Run tests in container
-docker exec snowworld-narrowcasting npm test
-
-# Interactive debugging
-docker exec -it snowworld-narrowcasting /bin/sh
-```
-
----
-
-For more information, see the main project documentation in `/docs/` directory.
+**Your SnowWorld Narrowcasting System now has professional Docker deployment capabilities!** 🎿❄️
