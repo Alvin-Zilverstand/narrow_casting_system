@@ -6,16 +6,32 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy root package files
 COPY package*.json ./
+
+# Copy backend package files
 COPY backend/package*.json ./backend/
+COPY backend/ ./backend/
+
+# Copy admin package files
 COPY admin/package*.json ./admin/
+COPY admin/ ./admin/
+
+# Copy client files
+COPY client/ ./client/
+COPY docs/ ./docs/
+COPY deployment/ ./deployment/
 
 # Install dependencies
-RUN npm run setup:backend && npm run setup:admin
+RUN cd backend && npm ci && cd ..
+RUN cd admin && npm ci && cd ..
 
 # Copy application code
-COPY . .
+COPY test_system.js ./
+COPY README.md ./
+COPY PROJECT_SUMMARY.md ./
+COPY CONTRIBUTING.md ./
+COPY .env.example ./
 
 # Create necessary directories
 RUN mkdir -p database logs public/uploads/images public/uploads/videos

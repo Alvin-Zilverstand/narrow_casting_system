@@ -5,8 +5,10 @@
   "main": "index.html",
   "scripts": {
     "start": "http-server -p 8080 -c-1",
-    "build": "echo 'Build complete'",
-    "test": "echo 'No tests specified'"
+    "build": "echo 'Admin build complete'",
+    "test": "echo 'Admin tests not configured'",
+    "lint": "echo 'Linting not configured'",
+    "clean": "rm -rf node_modules"
   },
   "dependencies": {},
   "devDependencies": {
