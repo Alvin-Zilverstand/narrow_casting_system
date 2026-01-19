@@ -28,6 +28,8 @@
     "clean:admin": "cd admin && rm -rf node_modules",
     "docker:build": "docker build -f deployment/docker/Dockerfile -t ghcr.io/alvin-zilverstand/narrow-casting-system .",
     "docker:run": "docker run -d -p 3000:3000 --name snowworld ghcr.io/alvin-zilverstand/narrow-casting-system",
+    "docker:tag-fix": "echo 'Note: Docker images must use lowercase repository names'",
+    "docker:ghcr-login": "echo 'Using GitHub Container Registry with automatic authentication'"
     "docker:compose": "cd deployment/docker && docker compose up -d",
     "docker:compose-down": "cd deployment/docker && docker compose down",
     "docker:compose-logs": "cd deployment/docker && docker compose logs -f"
