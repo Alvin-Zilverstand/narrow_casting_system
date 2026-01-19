@@ -165,5 +165,5 @@ jobs:
     - name: Upload final status report
       uses: actions/upload-artifact@v4
       with:
-        name: final-status-report
+        name: final-status-report-node-${{ matrix.node-version }}
         path: final-status-report.md
