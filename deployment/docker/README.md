@@ -6,18 +6,19 @@ This directory contains Docker configuration files for deploying the SnowWorld N
 
 ### Prerequisites
 - Docker Engine 20.10+
-- Docker Compose 1.29+
+- Docker Compose v2.0+
 
 ### Build and Run
 
 ```bash
-# Build the Docker image
-docker build -t snowworld-narrowcasting .
+# Navigate to docker directory
+cd deployment/docker
 
-# Run with Docker Compose
-docker-compose up -d
+# Build and run with Docker Compose v2
+docker compose up -d
 
-# Or run manually
+# Or build manually from root directory
+docker build -f deployment/docker/Dockerfile -t snowworld-narrowcasting .
 docker run -d -p 3000:3000 --name snowworld snowworld-narrowcasting
 ```
 
@@ -25,6 +26,21 @@ docker run -d -p 3000:3000 --name snowworld snowworld-narrowcasting
 - Main application: http://localhost:3000
 - Admin dashboard: http://localhost:3000/admin
 - Client display: http://localhost:3000/client?zone=reception
+
+### Docker Compose v2 Commands
+```bash
+# Start services
+docker compose up -d
+
+# Stop services
+docker compose down
+
+# View logs
+docker compose logs -f
+
+# Rebuild services
+docker compose build --no-cache
+```
 
 ## 📋 Docker Compose Services
 

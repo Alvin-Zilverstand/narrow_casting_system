@@ -26,9 +26,11 @@
     "clean": "npm run clean:backend && npm run clean:admin",
     "clean:backend": "cd backend && rm -rf node_modules",
     "clean:admin": "cd admin && rm -rf node_modules",
-    "docker:build": "docker build -f deployment/docker/Dockerfile -t snowworld-narrowcasting .",
-    "docker:run": "docker run -d -p 3000:3000 --name snowworld snowworld-narrowcasting",
-    "docker:compose": "docker-compose -f deployment/docker/docker-compose.yml up -d"
+    "docker:build": "docker build -f deployment/docker/Dockerfile -t ghcr.io/alvin-zilverstand/narrow-casting-system .",
+    "docker:run": "docker run -d -p 3000:3000 --name snowworld ghcr.io/alvin-zilverstand/narrow-casting-system",
+    "docker:compose": "cd deployment/docker && docker compose up -d",
+    "docker:compose-down": "cd deployment/docker && docker compose down",
+    "docker:compose-logs": "cd deployment/docker && docker compose logs -f"
   },
   "keywords": [
     "narrowcasting",

@@ -1,23 +1,31 @@
-# SnowWorld Narrowcasting System - Docker Compose Configuration
+# SnowWorld Narrowcasting System - Docker Compose Configuration (v2)
 
-version: '3.8'
+name: snowworld-narrowcasting
 
 services:
   snowworld-narrowcasting:
-    build: .
+    build: 
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile
     container_name: snowworld-narrowcasting
     ports:
       - "3000:3000"
     volumes:
-      - ./database:/app/database
-      - ./logs:/app/logs
-      - ./public/uploads:/app/public/uploads
+      - ../../database:/app/database
+      - ../../logs:/app/logs
+      - ../../public/uploads:/app/public/uploads
     environment:
       - NODE_ENV=production
       - PORT=3000
     restart: unless-stopped
     networks:
       - snowworld-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/zones', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   nginx:
     image: nginx:alpine
@@ -26,10 +34,11 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - ../configs/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../ssl:/etc/nginx/ssl:ro
     depends_on:
-      - snowworld-narrowcasting
+      snowworld-narrowcasting:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - snowworld-network
@@ -37,8 +46,12 @@ services:
 networks:
   snowworld-network:
     driver: bridge
+    name: snowworld-network
 
 volumes:
   database-data:
+    name: snowworld-database
   uploads-data:
+    name: snowworld-uploads
   logs-data:
+    name: snowworld-logs
