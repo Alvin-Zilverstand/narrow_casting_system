@@ -7,13 +7,27 @@ class DisplayManager {
         this.transitionDuration = 1000; // 1 second
         this.isPlaying = false;
         this.zone = this.getZoneFromURL() || 'reception';
+        this.zoneData = null;
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupEventListeners();
+        await this.loadZoneData();
         this.updateZoneDisplay();
         this.hideLoadingScreen();
+    }
+
+    async loadZoneData() {
+        try {
+            const response = await fetch(`http://localhost:3000/api/zones`);
+            if (!response.ok) throw new Error('Failed to fetch zones');
+            const zones = await response.json();
+            this.zoneData = zones.find(z => z.id === this.zone) || null;
+        } catch (error) {
+            console.error('Error loading zone data:', error);
+            this.zoneData = null;
+        }
     }
 
     setupEventListeners() {
@@ -44,12 +58,25 @@ class DisplayManager {
 
     updateZoneDisplay() {
         const zoneElement = document.getElementById('currentZone');
+        const zoneIconElement = document.querySelector('#zoneIndicator .zone-info i');
+        
         if (zoneElement) {
             zoneElement.textContent = this.getZoneDisplayName(this.zone);
+        }
+        
+        // Update icon if we have zone data
+        if (zoneIconElement && this.zoneData && this.zoneData.icon) {
+            zoneIconElement.className = `fas ${this.zoneData.icon}`;
         }
     }
 
     getZoneDisplayName(zoneId) {
+        // Use zone data from server if available
+        if (this.zoneData && this.zoneData.name) {
+            return this.zoneData.name;
+        }
+        
+        // Fallback to hardcoded names
         const zoneNames = {
             'reception': 'Receptie',
             'restaurant': 'Restaurant',
@@ -163,6 +190,15 @@ class DisplayManager {
                         <i class="fas fa-broadcast-tower"></i>
                         <h3>Livestream</h3>
                         <p>${contentItem.title}</p>
+                    </div>
+                `;
+                break;
+
+            case 'text':
+                element.innerHTML = `
+                    <div class="text-content">
+                        <h2 class="text-content-title">${contentItem.title}</h2>
+                        <div class="text-content-body">${contentItem.textContent}</div>
                     </div>
                 `;
                 break;
@@ -335,10 +371,11 @@ class DisplayManager {
         this.loadContent(newContent);
     }
 
-    setZone(zone) {
+    async setZone(zone) {
         if (this.zone !== zone) {
             console.log(`Zone changed from ${this.zone} to ${zone}`);
             this.zone = zone;
+            await this.loadZoneData();
             this.updateZoneDisplay();
             
             // Request new content for this zone

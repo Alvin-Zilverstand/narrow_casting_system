@@ -95,6 +95,39 @@ app.post('/api/content/upload', upload.single('content'), async (req, res) => {
   }
 });
 
+// Text Content Management
+app.post('/api/content/text', async (req, res) => {
+  try {
+    const { title, textContent, zone, duration } = req.body;
+
+    if (!title || !textContent) {
+      return res.status(400).json({ error: 'Title and text content are required' });
+    }
+
+    const contentData = {
+      id: uuidv4(),
+      title: title,
+      textContent: textContent,
+      zone: zone || 'all',
+      duration: parseInt(duration) || 15,
+      createdAt: new Date().toISOString()
+    };
+
+    const content = await contentManager.addTextContent(contentData);
+    
+    // Emit real-time update
+    io.emit('contentUpdated', {
+      type: 'content_added',
+      content: content
+    });
+
+    res.json({ success: true, content });
+  } catch (error) {
+    console.error('Text content creation error:', error);
+    res.status(500).json({ error: 'Failed to create text content' });
+  }
+});
+
 app.get('/api/content', async (req, res) => {
   try {
     const { zone, type } = req.query;
@@ -172,16 +205,44 @@ app.get('/api/schedule/:zone', async (req, res) => {
   }
 });
 
-app.get('/api/zones', (req, res) => {
-  const zones = [
-    { id: 'reception', name: 'Receptie', description: 'Hoofdingang en receptie' },
-    { id: 'restaurant', name: 'Restaurant', description: 'Eetgelegenheid' },
-    { id: 'skislope', name: 'Skibaan', description: 'Hoofdskibaan' },
-    { id: 'lockers', name: 'Kluisjes', description: 'Kleedkamers en kluisjes' },
-    { id: 'shop', name: 'Winkel', description: 'Ski-uitrusting winkel' },
-    { id: 'all', name: 'Alle zones', description: 'Toon op alle schermen' }
-  ];
-  res.json(zones);
+app.get('/api/zones', async (req, res) => {
+  try {
+    const zones = await dbManager.getZones();
+    res.json(zones);
+  } catch (error) {
+    console.error('Get zones error:', error);
+    res.status(500).json({ error: 'Failed to retrieve zones' });
+  }
+});
+
+app.post('/api/zones', async (req, res) => {
+  try {
+    const { id, name, description, icon, displayOrder } = req.body;
+    
+    if (!id || !name) {
+      return res.status(400).json({ error: 'Zone ID and name are required' });
+    }
+
+    const zoneData = {
+      id: id.toLowerCase().replace(/\s+/g, '-'),
+      name: name,
+      description: description || '',
+      icon: icon || 'fa-map-marker-alt',
+      displayOrder: parseInt(displayOrder) || 0
+    };
+
+    const zone = await dbManager.addZone(zoneData);
+    
+    io.emit('zonesUpdated', {
+      type: 'zone_added',
+      zone: zone
+    });
+
+    res.json({ success: true, zone });
+  } catch (error) {
+    console.error('Create zone error:', error);
+    res.status(500).json({ error: 'Failed to create zone' });
+  }
 });
 
 // Weather widget data

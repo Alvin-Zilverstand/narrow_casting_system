@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SnowWorld - Narrowcasting Admin Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="http://localhost:3000/favicon.svg">
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -65,6 +66,7 @@
                         <option value="image">Afbeeldingen</option>
                         <option value="video">Video's</option>
                         <option value="livestream">Livestreams</option>
+                        <option value="text">Tekst</option>
                     </select>
                     <button id="applyFilters" class="btn btn-secondary">Toepassen</button>
                 </div>
@@ -102,6 +104,9 @@
             <div id="zones-tab" class="tab-content">
                 <div class="section-header">
                     <h2>Zone Overzicht</h2>
+                    <button id="addZoneBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Zone Toevoegen
+                    </button>
                 </div>
 
                 <div id="zonesGrid" class="zones-grid">
@@ -161,6 +166,7 @@
                         <option value="image">Afbeelding</option>
                         <option value="video">Video</option>
                         <option value="livestream">Livestream</option>
+                        <option value="text">Tekst</option>
                     </select>
                 </div>
 
@@ -176,10 +182,17 @@
                     <input type="number" id="contentDuration" class="form-control" min="5" max="300" value="10">
                 </div>
 
-                <div class="form-group">
+                <!-- File upload field (shown for image/video) -->
+                <div id="fileUploadGroup" class="form-group">
                     <label for="contentFile">Bestand:</label>
-                    <input type="file" id="contentFile" class="form-control" accept="image/*,video/*" required>
+                    <input type="file" id="contentFile" class="form-control" accept="image/*,video/*">
                     <div id="fileInfo" class="file-info"></div>
+                </div>
+
+                <!-- Text content field (shown for text type) -->
+                <div id="textContentGroup" class="form-group" style="display: none;">
+                    <label for="textContent">Tekst:</label>
+                    <textarea id="textContent" class="form-control" rows="6" placeholder="Voer hier uw tekst in..."></textarea>
                 </div>
 
                 <div class="modal-actions">
@@ -234,6 +247,111 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeScheduleModal()">Annuleren</button>
                     <button type="submit" class="btn btn-primary">Plannen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Zone Modal -->
+    <div id="zoneModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Zone Toevoegen</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="zoneForm" class="modal-body">
+                <div class="form-group">
+                    <label for="zoneId">Zone ID (uniek):</label>
+                    <input type="text" id="zoneId" class="form-control" placeholder="bijv. nieuwe-zone" required>
+                    <small>Alleen kleine letters, cijfers en streepjes. Gebruikt in URLs.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="zoneName">Zone Naam:</label>
+                    <input type="text" id="zoneName" class="form-control" placeholder="bijv. Nieuwe Zone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="zoneDescription">Beschrijving:</label>
+                    <textarea id="zoneDescription" class="form-control" rows="3" placeholder="Optionele beschrijving van de zone..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="zoneDisplayOrder">Weergave Volgorde:</label>
+                    <input type="number" id="zoneDisplayOrder" class="form-control" min="0" value="0">
+                    <small>Lager nummer = eerder in de lijst</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Zone Icoon:</label>
+                    <input type="hidden" id="zoneIcon" value="fa-map-marker-alt">
+                    <div class="icon-selector">
+                        <div class="icon-option selected" data-icon="fa-map-marker-alt" title="Standaard">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-door-open" title="Ingang">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-utensils" title="Restaurant">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-skiing" title="Ski">
+                            <i class="fas fa-skiing"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-snowflake" title="Sneeuw">
+                            <i class="fas fa-snowflake"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-locker" title="Kluisjes">
+                            <i class="fas fa-locker"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-shopping-bag" title="Winkel">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-globe" title="Wereld">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-home" title="Thuis">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-building" title="Gebouw">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-mountain" title="Berg">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-tree" title="Boom">
+                            <i class="fas fa-tree"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-sun" title="Zon">
+                            <i class="fas fa-sun"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-moon" title="Maan">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-star" title="Ster">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-heart" title="Hart">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-info-circle" title="Info">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-exclamation-circle" title="Waarschuwing">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-check-circle" title="Goed">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="icon-option" data-icon="fa-users" title="Mensen">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeZoneModal()">Annuleren</button>
+                    <button type="submit" class="btn btn-primary">Toevoegen</button>
                 </div>
             </form>
         </div>

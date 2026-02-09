@@ -1,0 +1,63 @@
+# SnowWorld Narrowcasting System - Docker Compose (GitHub Container Registry)
+# Deze versie pulled de image van ghcr.io in plaats van lokaal te builden
+
+version: '3.8'
+
+services:
+  snowworld-narrowcasting:
+    image: ghcr.io/alvin-zilverstand/snowworld-narrowcasting:latest
+    container_name: snowworld-narrowcasting
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:3000:3000"
+    volumes:
+      # Mount de lokale database, logs en uploads voor persistentie
+      - ./database:/app/database
+      - ./logs:/app/logs
+      - ./public/uploads:/app/public/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - TZ=Europe/Amsterdam
+    networks:
+      - snowworld-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/zones', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optionele nginx reverse proxy voor productie
+  nginx:
+    image: nginx:alpine
+    container_name: snowworld-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/configs/nginx.conf:/etc/nginx/nginx.conf:ro
+      # SSL certificaten (indien beschikbaar)
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      snowworld-narrowcasting:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - snowworld-network
+    profiles:
+      - production
+
+networks:
+  snowworld-network:
+    driver: bridge
+    name: snowworld-network
+
+volumes:
+  database-data:
+    name: snowworld-database
+  uploads-data:
+    name: snowworld-uploads
+  logs-data:
+    name: snowworld-logs

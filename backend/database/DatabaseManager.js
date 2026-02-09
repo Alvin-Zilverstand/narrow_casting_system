@@ -61,6 +61,7 @@ class DatabaseManager {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         description TEXT,
+        icon TEXT DEFAULT 'fa-map-marker-alt',
         displayOrder INTEGER DEFAULT 0,
         isActive INTEGER DEFAULT 1
       )
@@ -82,23 +83,23 @@ class DatabaseManager {
       this.db.run(zonesTable);
       this.db.run(logsTable);
       
-      // Insert default zones
+      // Insert default zones with icons
       const defaultZones = [
-        { id: 'reception', name: 'Receptie', description: 'Hoofdingang en receptie', displayOrder: 1 },
-        { id: 'restaurant', name: 'Restaurant', description: 'Eetgelegenheid', displayOrder: 2 },
-        { id: 'skislope', name: 'Skibaan', description: 'Hoofdskibaan', displayOrder: 3 },
-        { id: 'lockers', name: 'Kluisjes', description: 'Kleedkamers en kluisjes', displayOrder: 4 },
-        { id: 'shop', name: 'Winkel', description: 'Ski-uitrusting winkel', displayOrder: 5 },
-        { id: 'all', name: 'Alle zones', description: 'Toon op alle schermen', displayOrder: 0 }
+        { id: 'reception', name: 'Receptie', description: 'Hoofdingang en receptie', icon: 'fa-door-open', displayOrder: 1 },
+        { id: 'restaurant', name: 'Restaurant', description: 'Eetgelegenheid', icon: 'fa-utensils', displayOrder: 2 },
+        { id: 'skislope', name: 'Skibaan', description: 'Hoofdskibaan', icon: 'fa-skiing', displayOrder: 3 },
+        { id: 'lockers', name: 'Kluisjes', description: 'Kleedkamers en kluisjes', icon: 'fa-locker', displayOrder: 4 },
+        { id: 'shop', name: 'Winkel', description: 'Ski-uitrusting winkel', icon: 'fa-shopping-bag', displayOrder: 5 },
+        { id: 'all', name: 'Alle zones', description: 'Toon op alle schermen', icon: 'fa-globe', displayOrder: 0 }
       ];
 
       const stmt = this.db.prepare(`
-        INSERT OR IGNORE INTO zones (id, name, description, displayOrder) 
-        VALUES (?, ?, ?, ?)
+        INSERT OR IGNORE INTO zones (id, name, description, icon, displayOrder) 
+        VALUES (?, ?, ?, ?, ?)
       `);
 
       defaultZones.forEach(zone => {
-        stmt.run(zone.id, zone.name, zone.description, zone.displayOrder);
+        stmt.run(zone.id, zone.name, zone.description, zone.icon, zone.displayOrder);
       });
 
       stmt.finalize();
@@ -111,22 +112,57 @@ class DatabaseManager {
   async addContent(contentData) {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare(`
-        INSERT INTO content (id, type, title, filename, originalName, mimeType, size, path, url, zone, duration, createdAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO content (id, type, title, filename, originalName, mimeType, size, path, url, zone, duration, textContent, createdAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       stmt.run(
         contentData.id,
         contentData.type,
         contentData.title,
-        contentData.filename,
-        contentData.originalName,
-        contentData.mimeType,
-        contentData.size,
-        contentData.path,
-        contentData.url,
+        contentData.filename || '',
+        contentData.originalName || '',
+        contentData.mimeType || '',
+        contentData.size || 0,
+        contentData.path || '',
+        contentData.url || '',
         contentData.zone,
         contentData.duration,
+        contentData.textContent || null,
+        contentData.createdAt,
+        function(err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(contentData);
+          }
+        }
+      );
+
+      stmt.finalize();
+    });
+  }
+
+  async addTextContent(contentData) {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare(`
+        INSERT INTO content (id, type, title, filename, originalName, mimeType, size, path, url, zone, duration, textContent, createdAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      stmt.run(
+        contentData.id,
+        'text',
+        contentData.title,
+        '',
+        '',
+        'text/plain',
+        0,
+        '',
+        '',
+        contentData.zone,
+        contentData.duration,
+        contentData.textContent,
         contentData.createdAt,
         function(err) {
           if (err) {
@@ -254,6 +290,33 @@ class DatabaseManager {
           resolve(rows);
         }
       });
+    });
+  }
+
+  async addZone(zoneData) {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare(`
+        INSERT INTO zones (id, name, description, icon, displayOrder, isActive)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+
+      stmt.run(
+        zoneData.id,
+        zoneData.name,
+        zoneData.description || '',
+        zoneData.icon || 'fa-map-marker-alt',
+        zoneData.displayOrder || 0,
+        1,
+        function(err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(zoneData);
+          }
+        }
+      );
+
+      stmt.finalize();
     });
   }
 

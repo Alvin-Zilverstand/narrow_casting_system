@@ -62,6 +62,29 @@ class UIManager {
         document.getElementById('contentFile')?.addEventListener('change', (e) => {
             this.previewFile(e.target.files[0]);
         });
+
+        // Content type change - show/hide appropriate fields
+        document.getElementById('contentType')?.addEventListener('change', (e) => {
+            this.handleContentTypeChange(e.target.value);
+        });
+
+        // Zone management
+        document.getElementById('addZoneBtn')?.addEventListener('click', () => {
+            this.openZoneModal();
+        });
+
+        document.getElementById('zoneForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.createZone();
+        });
+
+        // Icon selector
+        document.querySelectorAll('.icon-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const icon = e.currentTarget.dataset.icon;
+                this.selectIcon(icon);
+            });
+        });
     }
 
     // Tab Management
@@ -148,13 +171,15 @@ class UIManager {
         const typeIcon = {
             'image': 'fa-image',
             'video': 'fa-video',
-            'livestream': 'fa-broadcast-tower'
+            'livestream': 'fa-broadcast-tower',
+            'text': 'fa-font'
         }[item.type] || 'fa-file';
 
         const typeLabel = {
             'image': 'Afbeelding',
             'video': 'Video',
-            'livestream': 'Livestream'
+            'livestream': 'Livestream',
+            'text': 'Tekst'
         }[item.type] || 'Bestand';
 
         return `
@@ -162,6 +187,8 @@ class UIManager {
                 <div class="content-preview ${item.type}">
                     ${item.type === 'image' ? 
                         `<img src="${item.url}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/300x200?text=Afbeelding'">` :
+                        item.type === 'text' ?
+                        `<div class="text-preview"><i class="fas ${typeIcon} fa-3x"></i><p>${item.textContent ? item.textContent.substring(0, 50) + '...' : 'Tekst content'}</p></div>` :
                         `<i class="fas ${typeIcon} fa-3x"></i>`
                     }
                 </div>
@@ -184,10 +211,19 @@ class UIManager {
     }
 
     // Modal Management
-    openContentModal() {
+    async openContentModal() {
         const modal = document.getElementById('contentModal');
+        if (!modal) {
+            console.error('Content modal not found');
+            return;
+        }
         modal.classList.add('active');
-        this.loadZonesSelect('contentZone');
+        
+        // Reset form fields visibility before loading zones
+        this.handleContentTypeChange('');
+        
+        // Load zones into dropdown
+        await this.loadZonesSelect('contentZone');
     }
 
     openScheduleModal() {
@@ -206,7 +242,17 @@ class UIManager {
         // Reset forms
         document.getElementById('contentUploadForm')?.reset();
         document.getElementById('scheduleForm')?.reset();
+        document.getElementById('zoneForm')?.reset();
         document.getElementById('fileInfo').innerHTML = '';
+        
+        // Reset text content field
+        const textContent = document.getElementById('textContent');
+        if (textContent) {
+            textContent.value = '';
+        }
+        
+        // Reset form fields visibility
+        this.handleContentTypeChange('');
     }
 
     // Content Upload
@@ -232,39 +278,85 @@ class UIManager {
         }
     }
 
+    handleContentTypeChange(type) {
+        const fileUploadGroup = document.getElementById('fileUploadGroup');
+        const textContentGroup = document.getElementById('textContentGroup');
+        const contentFile = document.getElementById('contentFile');
+        const textContent = document.getElementById('textContent');
+
+        if (type === 'text') {
+            if (fileUploadGroup) fileUploadGroup.style.display = 'none';
+            if (textContentGroup) textContentGroup.style.display = 'block';
+            if (contentFile) contentFile.removeAttribute('required');
+            if (textContent) textContent.setAttribute('required', 'required');
+        } else {
+            if (fileUploadGroup) fileUploadGroup.style.display = 'block';
+            if (textContentGroup) textContentGroup.style.display = 'none';
+            if (contentFile) contentFile.setAttribute('required', 'required');
+            if (textContent) textContent.removeAttribute('required');
+        }
+    }
+
     async uploadContent() {
-        const form = document.getElementById('contentUploadForm');
-        const formData = new FormData();
-        
-        const fileInput = document.getElementById('contentFile');
         const title = document.getElementById('contentTitle').value;
         const type = document.getElementById('contentType').value;
         const zone = document.getElementById('contentZone').value;
         const duration = document.getElementById('contentDuration').value;
 
-        if (!fileInput.files[0]) {
-            this.showToast('Selecteer een bestand', 'error');
+        if (!type) {
+            this.showToast('Selecteer een type', 'error');
             return;
         }
 
-        formData.append('content', fileInput.files[0]);
-        formData.append('title', title);
-        formData.append('type', type);
-        formData.append('zone', zone);
-        formData.append('duration', duration);
-
         try {
-            this.showLoading('Bezig met uploaden...');
-            const result = await api.uploadContent(formData);
+            this.showLoading('Bezig met opslaan...');
+
+            if (type === 'text') {
+                // Handle text content
+                const textContent = document.getElementById('textContent').value;
+                
+                if (!textContent.trim()) {
+                    this.showToast('Voer tekst in', 'error');
+                    this.hideLoading();
+                    return;
+                }
+
+                const textData = {
+                    title: title,
+                    textContent: textContent,
+                    zone: zone,
+                    duration: parseInt(duration)
+                };
+
+                const result = await api.createTextContent(textData);
+            } else {
+                // Handle file upload
+                const fileInput = document.getElementById('contentFile');
+                
+                if (!fileInput.files[0]) {
+                    this.showToast('Selecteer een bestand', 'error');
+                    this.hideLoading();
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('content', fileInput.files[0]);
+                formData.append('title', title);
+                formData.append('type', type);
+                formData.append('zone', zone);
+                formData.append('duration', duration);
+
+                const result = await api.uploadContent(formData);
+            }
             
             this.closeModals();
             this.clearContentCache();
             await this.loadContent();
             
-            this.showToast('Content succesvol geüpload!', 'success');
+            this.showToast('Content succesvol opgeslagen!', 'success');
         } catch (error) {
             console.error('Upload error:', error);
-            this.showToast('Upload mislukt: ' + error.message, 'error');
+            this.showToast('Opslaan mislukt: ' + error.message, 'error');
         } finally {
             this.hideLoading();
         }
@@ -368,6 +460,50 @@ class UIManager {
         document.getElementById('scheduleEnd').value = endTime.toISOString().slice(0, 16);
     }
 
+    async createZone() {
+        const zoneId = document.getElementById('zoneId').value.trim();
+        const zoneName = document.getElementById('zoneName').value.trim();
+        const zoneDescription = document.getElementById('zoneDescription').value.trim();
+        const zoneDisplayOrder = document.getElementById('zoneDisplayOrder').value;
+        const zoneIcon = document.getElementById('zoneIcon').value;
+
+        if (!zoneId || !zoneName) {
+            this.showToast('Zone ID en naam zijn verplicht', 'error');
+            return;
+        }
+
+        // Validate zone ID format (lowercase letters, numbers, hyphens only)
+        const validIdPattern = /^[a-z0-9-]+$/;
+        if (!validIdPattern.test(zoneId)) {
+            this.showToast('Zone ID mag alleen kleine letters, cijfers en streepjes bevatten', 'error');
+            return;
+        }
+
+        const zoneData = {
+            id: zoneId,
+            name: zoneName,
+            description: zoneDescription,
+            icon: zoneIcon,
+            displayOrder: parseInt(zoneDisplayOrder) || 0
+        };
+
+        try {
+            this.showLoading('Bezig met toevoegen...');
+            await api.createZone(zoneData);
+            
+            this.closeModals();
+            this.zonesCache = null; // Clear cache
+            await this.loadZonesOverview();
+            
+            this.showToast('Zone succesvol toegevoegd!', 'success');
+        } catch (error) {
+            console.error('Zone creation error:', error);
+            this.showToast('Zone toevoegen mislukt: ' + error.message, 'error');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
     // Zones Management
     async loadZones() {
         if (this.zonesCache) return this.zonesCache;
@@ -382,13 +518,32 @@ class UIManager {
     }
 
     async loadZonesSelect(selectId) {
-        const zones = await this.loadZones();
-        const select = document.getElementById(selectId);
-        if (!select) return;
+        try {
+            const zones = await this.loadZones();
+            const select = document.getElementById(selectId);
+            if (!select) {
+                console.error(`Select element with id '${selectId}' not found`);
+                return;
+            }
 
-        select.innerHTML = zones.map(zone => 
-            `<option value="${zone.id}">${zone.name}</option>`
-        ).join('');
+            if (!zones || zones.length === 0) {
+                console.error('No zones loaded');
+                select.innerHTML = '<option value="">Geen zones beschikbaar</option>';
+                return;
+            }
+
+            select.innerHTML = zones.map(zone => 
+                `<option value="${zone.id}">${zone.name}</option>`
+            ).join('');
+            
+            console.log(`Loaded ${zones.length} zones into ${selectId}`);
+        } catch (error) {
+            console.error('Error in loadZonesSelect:', error);
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = '<option value="">Fout bij laden zones</option>';
+            }
+        }
     }
 
     async loadContentSelect() {
@@ -410,24 +565,41 @@ class UIManager {
         const grid = document.getElementById('zonesGrid');
         if (!grid) return;
 
-        const zoneIcons = {
-            'reception': 'fa-door-open',
-            'restaurant': 'fa-utensils',
-            'skislope': 'fa-skiing',
-            'lockers': 'fa-locker',
-            'shop': 'fa-shopping-bag',
-            'all': 'fa-globe'
-        };
-
         grid.innerHTML = zones.map(zone => `
             <div class="zone-card">
                 <div class="zone-icon">
-                    <i class="fas ${zoneIcons[zone.id] || 'fa-map-marker-alt'} fa-3x"></i>
+                    <i class="fas ${zone.icon || 'fa-map-marker-alt'} fa-3x"></i>
                 </div>
                 <h3 class="zone-name">${zone.name}</h3>
                 <p class="zone-description">${zone.description}</p>
             </div>
         `).join('');
+    }
+
+    selectIcon(iconName) {
+        // Update hidden input
+        document.getElementById('zoneIcon').value = iconName;
+        
+        // Update visual selection
+        document.querySelectorAll('.icon-option').forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.icon === iconName) {
+                option.classList.add('selected');
+            }
+        });
+    }
+
+    openZoneModal() {
+        const modal = document.getElementById('zoneModal');
+        if (!modal) {
+            console.error('Zone modal not found');
+            return;
+        }
+        modal.classList.add('active');
+        
+        // Reset icon selection to default
+        this.selectIcon('fa-map-marker-alt');
+    }
     }
 
     // Analytics
@@ -565,3 +737,22 @@ class UIManager {
 
 // Create global UI instance
 window.ui = new UIManager();
+
+// Global helper functions for onclick handlers
+window.closeModal = function() {
+    if (window.ui) {
+        window.ui.closeModals();
+    }
+};
+
+window.closeScheduleModal = function() {
+    if (window.ui) {
+        window.ui.closeModals();
+    }
+};
+
+window.closeZoneModal = function() {
+    if (window.ui) {
+        window.ui.closeModals();
+    }
+};

@@ -14,6 +14,17 @@ class ContentManager {
     }
   }
 
+  async addTextContent(contentData) {
+    try {
+      const content = await this.db.addTextContent(contentData);
+      await this.db.addLog('content', 'Text content added', { contentId: content.id, type: 'text' });
+      return content;
+    } catch (error) {
+      console.error('Error adding text content:', error);
+      throw error;
+    }
+  }
+
   async getContent(zone = null, type = null) {
     try {
       return await this.db.getContent(zone, type);
@@ -92,7 +103,8 @@ class ContentManager {
     const allowedTypes = {
       'image': ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
       'video': ['video/mp4', 'video/webm', 'video/ogg'],
-      'livestream': ['application/x-mpegURL', 'application/vnd.apple.mpegurl']
+      'livestream': ['application/x-mpegURL', 'application/vnd.apple.mpegurl'],
+      'text': ['text/plain']
     };
 
     for (const [type, mimeTypes] of Object.entries(allowedTypes)) {
@@ -109,7 +121,8 @@ class ContentManager {
     const defaultDurations = {
       'image': 10,
       'video': 30,
-      'livestream': 3600 // 1 hour for livestreams
+      'livestream': 3600, // 1 hour for livestreams
+      'text': 15
     };
 
     // For videos, estimate duration based on file size (rough approximation)

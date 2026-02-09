@@ -50,6 +50,13 @@ class APIService {
         });
     }
 
+    async createTextContent(textData) {
+        return this.request('/content/text', {
+            method: 'POST',
+            body: JSON.stringify(textData)
+        });
+    }
+
     async deleteContent(contentId) {
         return this.request(`/content/${contentId}`, {
             method: 'DELETE'
@@ -71,6 +78,13 @@ class APIService {
     // Zones
     async getZones() {
         return this.request('/zones');
+    }
+
+    async createZone(zoneData) {
+        return this.request('/zones', {
+            method: 'POST',
+            body: JSON.stringify(zoneData)
+        });
     }
 
     // Weather Data
