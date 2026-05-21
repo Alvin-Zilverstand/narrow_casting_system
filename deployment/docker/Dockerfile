@@ -1,7 +1,7 @@
 # SnowWorld Narrowcasting System - Docker Configuration
 
 # Use official Node.js runtime as base image
-FROM node:25.8.1-alpine
+FROM node:25.9.0-alpine
 
 # Set working directory
 WORKDIR /app
